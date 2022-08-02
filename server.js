@@ -1,5 +1,8 @@
+// https://polar-waters-98180.herokuapp.com/
+
 const {animals} = require('./data/animals.json');
 const express = require('express');
+const PORT = process.env.PORT || 3001;
 const app = express();
 
 // take req.query as an argument and return a filtered list of query results
@@ -48,6 +51,6 @@ app.get('/api/animals', (req, res) => {
     res.json(results);
 });
 
-app.listen(3001, () => {
-    console.log('API server on port 3001.');
+app.listen(PORT, () => {
+    console.log(`API server now on port ${PORT}.`);
 });
