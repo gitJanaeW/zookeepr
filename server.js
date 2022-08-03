@@ -1,8 +1,16 @@
 // https://polar-waters-98180.herokuapp.com/
+const fs = require('fs');
+const path = require('path'); // for working with relative paths in your files/directories
 const express = require('express');
 const { animals } = require('./data/animals');
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+// "extend: true" tells ous our server that there may be nested data within the JSON object to parse
+// (otherwise it will parse only the most external data only) 
+app.use(express.urlencoded({extend: true}));
+// takes incoming POST data (in JSON) and parses it into the req.body object
+app.use(express.json());
 
 // take req.query as an argument and return a filtered list of query results
 function filterByQuery(query, animalsArray) {
@@ -44,6 +52,42 @@ function findById(id, animalsArray) {
   return result;
 }
 
+// import to the animals array
+function createNewAnimal(body, animalsArray) {
+  const animal = body;
+  console.log('animal: ', animal);
+  animalsArray.push(animal);
+  console.log('animalsArray: ', animalsArray);
+  // writeFileSync is the sync version of the asycn "writeFile" function. Bc this is a small data set, sync will work for our needs
+  fs.writeFileSync(
+    // __dirname represents the file we're executing code in. the 2nd parameter is the file that is being joined
+    path.join(__dirname, './data/animals.json'),
+    // parse the animal array into JSON
+    JSON.stringify({animals:animalsArray},
+    // null represents no changes to our existing data, 2 represents wanting to create white space between our existing data
+    // The arguments are optional, but the return data is easier to read with them included
+    null, 2)
+  );
+  return animal;
+}
+
+function validateAnimal(animal) {
+  if (!animal.name || typeof animal.name !== 'string') {
+    return false;
+  }
+  if (!animal.species || typeof animal.species !== 'string') {
+    return false;
+  }
+  if (!animal.diet || typeof animal.diet !== 'string') {
+    return false;
+  }
+  if (!animal.personalityTraits || typeof personalityTraits !== 'string') {
+    return false;
+  }
+  return true;
+}
+
+// get represents the a server requesting that a client accept data. Server -> client
 // get() arguments are: the route that the client will have to fetch from (ie. a part of the URL)
 // & a function taht will execute when that route is accessed with a GET request
 app.get('/api/animals', (req, res) => {
@@ -53,7 +97,7 @@ app.get('/api/animals', (req, res) => {
   }
   console.log(res);
   // when response is "got", send result to the client, using the res parameter's "json()" method
-    // res = response
+  // res = response. .json tells the client what type of data to expect (JSON in this case)
   res.json(results);
 });
 
@@ -67,6 +111,22 @@ app.get('/api/animals/:id', (req, res) => {
   } else {
     res.send(404);
   }
+});
+
+// post represents a client requesting that the server accept data. Client -> server
+app.post('/api/animals', (req, res) => {
+  // set id to the whatever the value of the next index would be in string form (note: length is index +1 which is why we used it)
+  req.body.id = animals.length.toString();  
+  // req.body is where incoming JSON object will be stored
+  console.log(req.body, animals);
+  if (!validateAnimal(req.body)) {
+    res.status(400).send('The animal is not properly formatted.');
+  } else {
+    // add animal to JSON file and animals array in this function
+    const animal = createNewAnimal(req.body, animals);
+    res.json(req.body);
+  }
+  
 });
 
 app.listen(PORT, () => {
