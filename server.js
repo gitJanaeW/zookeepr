@@ -82,7 +82,7 @@ function validateAnimal(animal) {
   if (!animal.diet || typeof animal.diet !== 'string') {
     return false;
   }
-  if (!animal.personalityTraits || typeof personalityTraits !== 'string') {
+  if (!animal.personalityTraits) {
     return false;
   }
   return true;
@@ -95,9 +95,24 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// "*" symbolizes any route that isn't defined in case the endpoint the user inputs doesn't exist
+// the "*" route should always come last
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'))
+});
+
 // get represents the a server requesting that a client accept data. Server -> client
 // get() arguments are: the route that the client will have to fetch from (ie. a part of the URL)
 // & a function taht will execute when that route is accessed with a GET request
+// a route with "/api/" will be responsible for handling JSON data
 app.get('/api/animals', (req, res) => {
   let results = animals;
   if (req.query) {
