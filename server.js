@@ -103,12 +103,6 @@ app.get('/zookeepers', (req, res) => {
   res.sendFile(path.join(__dirname, './public/zookeepers.html'));
 });
 
-// "*" symbolizes any route that isn't defined in case the endpoint the user inputs doesn't exist
-// the "*" route should always come last
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, './public/index.html'))
-});
-
 // get represents the a server requesting that a client accept data. Server -> client
 // get() arguments are: the route that the client will have to fetch from (ie. a part of the URL)
 // & a function taht will execute when that route is accessed with a GET request
@@ -134,6 +128,12 @@ app.get('/api/animals/:id', (req, res) => {
   } else {
     res.send(404);
   }
+});
+
+// "*" symbolizes any route that isn't defined in case the endpoint the user inputs doesn't exist
+// the "*" route should always come last
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'))
 });
 
 // post represents a client requesting that the server accept data. Client -> server
