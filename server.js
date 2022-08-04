@@ -11,6 +11,9 @@ const app = express();
 app.use(express.urlencoded({extend: true}));
 // takes incoming POST data (in JSON) and parses it into the req.body object
 app.use(express.json());
+// provide a file path to a public and instruct the server to make these files static resources
+// "public": if anyone on the frontend requests a file (of any kind like js, css, img), look for it in the public folder
+app.use(express.static('public'));
 
 // take req.query as an argument and return a filtered list of query results
 function filterByQuery(query, animalsArray) {
@@ -54,10 +57,8 @@ function findById(id, animalsArray) {
 
 // import to the animals array
 function createNewAnimal(body, animalsArray) {
-  const animal = body;
-  console.log('animal: ', animal);
-  animalsArray.push(animal);
-  console.log('animalsArray: ', animalsArray);
+  const animal = body; // Create a new var for body (aka: animal)
+  animalsArray.push(animal); // Push animal to the animalsArray
   // writeFileSync is the sync version of the asycn "writeFile" function. Bc this is a small data set, sync will work for our needs
   fs.writeFileSync(
     // __dirname represents the file we're executing code in. the 2nd parameter is the file that is being joined
@@ -86,6 +87,13 @@ function validateAnimal(animal) {
   }
   return true;
 }
+
+// "/" represents the root route of a server (ie. the homepage)
+app.get('/', (req, res) => {
+  // pathing to the html code we want to display in the browser when the "/" path is followed in the URL
+  // "__dirname" iss a special var that will path to your server code (in our case, that will be this file, server.js)
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
 // get represents the a server requesting that a client accept data. Server -> client
 // get() arguments are: the route that the client will have to fetch from (ie. a part of the URL)
